@@ -73,7 +73,7 @@ public class BlueRight extends LinearOpMode {
 
         //Traj Seq
         TrajectorySequence start = drive.trajectorySequenceBuilder(new Pose2d(36, -64, Math.toRadians(0)))
-                .lineToSplineHeading(new Pose2d(36, -23, Math.toRadians(0)))//first pole-small
+                .lineToSplineHeading(new Pose2d(36, -22, Math.toRadians(0)))//first pole-small
                 //.lineToSplineHeading(new Pose2d(35, -24, Math.toRadians(0)))
 
 
@@ -93,45 +93,64 @@ public class BlueRight extends LinearOpMode {
 
                 .UNSTABLE_addTemporalMarkerOffset(-0.3, ()->fBL.setPosition(0.88))
 
-                .lineToSplineHeading(new Pose2d(56, -12, Math.toRadians(0)),
+                .lineToSplineHeading(new Pose2d(55, -12, Math.toRadians(0)),
                         SampleMecanumDrive.getVelocityConstraint(12, DriveConstants.MAX_ANG_VEL,
                                 DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .waitSeconds(1)
-                .UNSTABLE_addTemporalMarkerOffset(-0.9, ()->close())
-                .UNSTABLE_addTemporalMarkerOffset(-0.5, ()->{
+                .waitSeconds(0.5)
+                .UNSTABLE_addTemporalMarkerOffset(-0.4, ()->close())
+                .UNSTABLE_addTemporalMarkerOffset(-0.2, ()->{
                     Subs intake = new Subs(lSlides, rSlides, 800);
                     intake.start();
                 })
                 .lineToSplineHeading(new Pose2d(36, -12, Math.toRadians(0)))
-                .UNSTABLE_addTemporalMarkerOffset(-0.3, ()->fBL.setPosition(0.55))
+                .UNSTABLE_addTemporalMarkerOffset(-0.3, ()->fBL.setPosition(0.53))
                 .lineToSplineHeading(new Pose2d(36, -25, Math.toRadians(0)))
-                .waitSeconds(1)
+                .waitSeconds(0.5)
                 .UNSTABLE_addTemporalMarkerOffset(-0.1,()->{
                     open();
-                    Subs lower = new Subs(lSlides, rSlides, 0);
-                    lower.start();
+                    new Thread(()->{
+
+
+                        lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+                        lSlides.setPower(-1);
+                        rSlides.setPower(-1);
+
+
+                        while(lSlides.getCurrentPosition() > 0){
+                            continue;
+                        }
+                        lSlides.setPower(0);
+                        rSlides.setPower(0);
+                    }).start();
 
                 })
-                .UNSTABLE_addTemporalMarkerOffset(0,()->fBL.setPosition(0.5))
+                .UNSTABLE_addTemporalMarkerOffset(0.2,()->fBL.setPosition(0.5))
 
 
-                //second cycle
-                /*
+
+
+
+                .build();
+        //second pickup
+        TrajectorySequence cycle2 = drive.trajectorySequenceBuilder(cycle.end())
                 .lineToSplineHeading(new Pose2d(37, -12, Math.toRadians(0)))
 
                 .UNSTABLE_addTemporalMarkerOffset(-0.3, ()-> fBL.setPosition(0.9))
 
-                .lineToSplineHeading(new Pose2d(56, -12, Math.toRadians(0)),
+                .lineToSplineHeading(new Pose2d(55, -12, Math.toRadians(0)),
                         SampleMecanumDrive.getVelocityConstraint(12, DriveConstants.MAX_ANG_VEL,
                                 DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .waitSeconds(1)
-                .UNSTABLE_addTemporalMarkerOffset(-0.9, ()->close())
-                .UNSTABLE_addTemporalMarkerOffset(-0.5, ()->{
+                .waitSeconds(0.5)
+                .UNSTABLE_addTemporalMarkerOffset(-0.4, ()->close())
+                .UNSTABLE_addTemporalMarkerOffset(-0.2, ()->{
                     new Thread(()->{
-                        lSlides.setTargetPosition(800);
-                        rSlides.setTargetPosition(800);
+                        lSlides.setTargetPosition(1300);
+                        rSlides.setTargetPosition(1300);
 
 
                         lSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -149,32 +168,59 @@ public class BlueRight extends LinearOpMode {
                         rSlides.setPower(0);
                     }).start();
                 })
-                .lineToSplineHeading(new Pose2d(36, -12, Math.toRadians(0)))
-                .UNSTABLE_addTemporalMarkerOffset(-0.3, ()->fBL.setPosition(0.3))
-                .lineToSplineHeading(new Pose2d(36, -25, Math.toRadians(0)))
-                .lineToSplineHeading(new Pose2d(30, -25, Math.toRadians(0)))
+                .lineToSplineHeading(new Pose2d(14, -12, Math.toRadians(0)))
+                .UNSTABLE_addTemporalMarkerOffset(-0.3, ()->fBL.setPosition(0.51))
+                .lineToSplineHeading(new Pose2d(14, -26.5, Math.toRadians(0)))
+
                 .waitSeconds(1)
-                .UNSTABLE_addTemporalMarkerOffset(-0.1,()->open())
-                */
+                .UNSTABLE_addTemporalMarkerOffset(-0.1,()->{
+                    open();
+
+
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.1, ()->close())
+                .UNSTABLE_addTemporalMarkerOffset(0.2, ()->fBL.setPosition(0))
+                .UNSTABLE_addTemporalMarkerOffset(0.5, ()->{
+                    new Thread(()->{
+
+
+                        lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+                        lSlides.setPower(-1);
+                        rSlides.setPower(-1);
+
+
+                        while(lSlides.getCurrentPosition() > 0){
+                            continue;
+                        }
+                        lSlides.setPower(0);
+                        rSlides.setPower(0);
+                    }).start();
+                })
+
 
 
 
 
                 .build();
+
+
 
 
         //parking spot one
-        Trajectory parkone = drive.trajectoryBuilder(cycle.end())
-                .lineTo(new Vector2d(18,-13))
+        Trajectory parkone = drive.trajectoryBuilder(cycle2.end())
+                .lineTo(new Vector2d(14,-36))
                 .build();
-        Trajectory parktwo = drive.trajectoryBuilder(cycle.end())
-                .lineTo(new Vector2d(36,-13))
+        Trajectory parktwo = drive.trajectoryBuilder(cycle2.end())
+                .lineTo(new Vector2d(38,-36))
                 .build();
         //parking spot two
         //JUST STAY PUT AT 36, -10
         //parking spot three
-        Trajectory parkthree = drive.trajectoryBuilder(cycle.end())
-                .lineTo(new Vector2d(60,-13))
+        Trajectory parkthree = drive.trajectoryBuilder(cycle2.end())
+                .lineTo(new Vector2d(62,-36))
                 .build();
         //THIS CODE RUNS CONTOUR PIPELINE
         //JUST INITIALIZES EVERYTHING SHOULD BE EASY
@@ -227,6 +273,8 @@ public class BlueRight extends LinearOpMode {
         drive.setPoseEstimate(startPose);
         drive.followTrajectorySequence(start);
         drive.followTrajectorySequence(cycle);
+        drive.followTrajectorySequence(cycle2);
+
 
         close();
         sleep(200);
@@ -236,11 +284,15 @@ public class BlueRight extends LinearOpMode {
             drive.followTrajectory(parkone);
         }
         if(parkingSpot == 2){
+            drive.followTrajectory(parkone);
             drive.followTrajectory(parktwo);
         }
         if(parkingSpot ==3){
+            drive.followTrajectory(parkone);
             drive.followTrajectory(parkthree);
         }
+        fBL.setPosition(0);
+        sleep(2000);
 
 
 
