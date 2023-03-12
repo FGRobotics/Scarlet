@@ -6,6 +6,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -64,7 +65,7 @@ public class ContourPipeline extends OpenCvPipeline {
 
             Imgproc.morphologyEx(src, src, Imgproc.MORPH_OPEN, new Mat());
             // GaussianBlur
-            Imgproc.blur(src, src, new Size(20, 20));
+            Imgproc.blur(src, src, new Size(10, 10));
 
 
             //Finding Contours
@@ -92,8 +93,15 @@ public class ContourPipeline extends OpenCvPipeline {
 
                 MatOfPoint2f areaPoints = new MatOfPoint2f(contour.toArray());
 
+
                 Rect rect = Imgproc.boundingRect(areaPoints);
-                if(rect.width > 100 && parkingSpot < 3 && rect.height < 150 && rect.x < 1000 && rect.x > 300) {
+                double cntarea = Imgproc.contourArea(contour);
+                double rectarea = rect.area();
+
+                double extent = cntarea / rectarea;
+
+                if(rect.width >= 100 && rect.width <= 300 && extent >= 0.86) {
+                    Imgproc.putText(end, String.valueOf(extent), rect.tl(), 1,6, new Scalar(255,0,0));
                     Imgproc.rectangle(end, rect, new Scalar(255,0,0));
                     parkingSpot++;
                 }

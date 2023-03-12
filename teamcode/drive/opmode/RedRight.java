@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.drive.opmode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
@@ -25,7 +26,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.io.IOException;
 import java.util.List;
-
+@Disabled
 @Autonomous(name="Red Right",group="Linear OpMode")
 public class RedRight extends LinearOpMode {
 

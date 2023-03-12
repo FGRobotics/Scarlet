@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
+import android.hardware.Sensor;
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
@@ -34,7 +36,11 @@ public class PowerPlayTeleOp extends LinearOpMode {
     private DcMotor lSlides, rSlides; //joey was here
     private List<DcMotorEx> motors;
     private boolean isOpen = false;
-    private Servo fBL, rightClaw, leftClaw;
+
+
+
+    private Servo fBL, rightClaw, leftClaw, brace;
+    private DistanceSensor frontDist;
 
     private int upperBound = 2400;
     private int lowerBound = 0;
@@ -42,9 +48,9 @@ public class PowerPlayTeleOp extends LinearOpMode {
 
     private boolean isAlive = false;
     private int fBLpos = 0;
-    private double[] dropPositions = {1,0.9 ,0.6, 0.3, 0, 0.45};
+    private double[] dropPositions = {1,0.9 ,0.55, 0.3, 0, 0.45};
     private int polePos = 0;
-    private double fieldCentricMultiplier = .6;
+    private double fieldCentricMultiplier = .7;
     private double rotationalMult = .6;
     double lastResetpos = 0.0;
     //private int normTurnTable = turnTable.getCurrentPosition();
@@ -70,12 +76,18 @@ public class PowerPlayTeleOp extends LinearOpMode {
         imu.initialize(parameters);
 
         // Set up our telemetry dashboard
-
+        frontDist = hardwareMap.get(DistanceSensor.class, "frontDist");
 
         leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
         rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
         rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+
+        //Brake behavier
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
 
@@ -98,6 +110,7 @@ public class PowerPlayTeleOp extends LinearOpMode {
 
 
         fBL = hardwareMap.get(Servo.class, "fourbar");
+        brace = hardwareMap.get(Servo.class, "pusher");
         //fBL.setPosition(0);
 
         leftClaw = hardwareMap.get(Servo.class, "leftClaw");
@@ -162,9 +175,40 @@ public class PowerPlayTeleOp extends LinearOpMode {
             rotationalMult = (rotationalMult == 0.9) ? 0.2 : 0.9;
 
         }
+        if(gamepad1.dpad_left){
+            new Thread(()->{
+                while(frontDist.getDistance(DistanceUnit.INCH) > 5){
+                    turnLeft(0.5);
+                }
+                if(gamepad1.dpad_right){
+
+                }
+
+            }).start();
+        }
+        if(gamepad1.dpad_right){
+            new Thread(()->{
+                while(frontDist.getDistance(DistanceUnit.INCH) > 5){
+                    turnRight(0.5);
+                }
+
+            }).start();
+        }
 
 
 
+    }
+    public void turnRight(double power){
+        leftRear.setPower(power);
+        leftFront.setPower(power);
+        rightRear.setPower(-power);
+        rightFront.setPower(-power);
+    }
+    public void turnLeft(double power){
+        leftRear.setPower(-power);
+        leftFront.setPower(-power);
+        rightRear.setPower(power);
+        rightFront.setPower(power);
     }
 
     public void gp2() {
@@ -184,6 +228,20 @@ public class PowerPlayTeleOp extends LinearOpMode {
             }
         }
 
+        if(gamepad2.options ){
+            if(brace.getPosition() != 1) {
+                new Thread(()->{
+                    brace.setPosition(1);
+                    sleep(200);
+                }).start();
+            } else{
+                new Thread(()->{
+                    brace.setPosition(0.3);
+                    sleep(200);
+                }).start();
+            }
+        }
+
         //slides
         //lSlides.setPower(gamepad2.left_stick_y);
         //rSlides.setPower(gamepad2.left_stick_y);
@@ -191,6 +249,7 @@ public class PowerPlayTeleOp extends LinearOpMode {
         //Intake Position
         if(gamepad2.cross){
             new Thread(()->{
+                brace.setPosition(0.3);
                 close();
                 fBL.setPosition(1);
             }).start();
@@ -199,9 +258,12 @@ public class PowerPlayTeleOp extends LinearOpMode {
         if(gamepad2.square){
             new Thread(()->{
                 fBLpos = 2;
+
+
                 close();
                 fBL.setPosition(dropPositions[fBLpos]);
                 sleep(350);
+                brace.setPosition(1);
             }).start();
         }
         //back setup
