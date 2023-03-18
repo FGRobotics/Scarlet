@@ -36,6 +36,7 @@ public class PowerPlayTeleOp extends LinearOpMode {
     private DcMotor lSlides, rSlides; //joey was here
     private List<DcMotorEx> motors;
     private boolean isOpen = false;
+    boolean tCancel = false;
 
 
 
@@ -177,19 +178,25 @@ public class PowerPlayTeleOp extends LinearOpMode {
         }
         if(gamepad1.dpad_left){
             new Thread(()->{
-                while(frontDist.getDistance(DistanceUnit.INCH) > 5){
-                    turnLeft(0.5);
-                }
-                if(gamepad1.dpad_right){
-
+                while((frontDist.getDistance(DistanceUnit.INCH) > 5) && !tCancel) {
+                    turnLeft(0.3);
+                    if(gamepad1.dpad_down){
+                        tCancel = true;
+                    }
                 }
 
             }).start();
         }
+
+        tCancel = false;
+
         if(gamepad1.dpad_right){
             new Thread(()->{
-                while(frontDist.getDistance(DistanceUnit.INCH) > 5){
+                while((frontDist.getDistance(DistanceUnit.INCH) > 5) && !tCancel){
                     turnRight(0.5);
+                    if(gamepad1.dpad_down){
+                        tCancel = true;
+                    }
                 }
 
             }).start();
