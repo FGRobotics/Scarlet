@@ -221,7 +221,6 @@ public class PowerPlayTeleOp extends LinearOpMode {
     public void gp2() {
 
 
-
         //Claw
         if(gamepad2.left_bumper){
             if(!isOpen) {
@@ -235,20 +234,6 @@ public class PowerPlayTeleOp extends LinearOpMode {
             }
         }
 
-        if(gamepad2.options ){
-            if(brace.getPosition() != 1) {
-                new Thread(()->{
-                    brace.setPosition(1);
-                    sleep(200);
-                }).start();
-            } else{
-                new Thread(()->{
-                    brace.setPosition(0.3);
-                    sleep(200);
-                }).start();
-            }
-        }
-
         //slides
         //lSlides.setPower(gamepad2.left_stick_y);
         //rSlides.setPower(gamepad2.left_stick_y);
@@ -256,21 +241,21 @@ public class PowerPlayTeleOp extends LinearOpMode {
         //Intake Position
         if(gamepad2.cross){
             new Thread(()->{
-                brace.setPosition(0.3);
                 close();
                 fBL.setPosition(1);
+
+                if(fBL.getPosition()>0.7){pusher.setPosition(1);}
             }).start();
         }
         //front drop
         if(gamepad2.square){
             new Thread(()->{
-                fBLpos = 2;
-
-
+                fBLpos = 3;
                 close();
-                fBL.setPosition(dropPositions[fBLpos]);
+                //fBL.setPosition(dropPositions[fBLpos]);
+                fBL.setPosition(0.4);
                 sleep(350);
-                brace.setPosition(1);
+                pusher.setPosition(0.8);
             }).start();
         }
         //back setup
@@ -278,8 +263,10 @@ public class PowerPlayTeleOp extends LinearOpMode {
             new Thread(()->{
                 fBLpos = 3;
                 close();
-                fBL.setPosition(dropPositions[fBLpos]);
+                //fBL.setPosition(dropPositions[fBLpos]);
+                fBL.setPosition(0);
                 sleep(350);
+                pusher.setPosition(0);
             }).start();
         }
         //back drop
@@ -289,6 +276,7 @@ public class PowerPlayTeleOp extends LinearOpMode {
                 close();
                 fBL.setPosition(dropPositions[fBLpos]);
                 sleep(350);
+                pusher.setPosition(0);
             }).start();
         }
         //vertical
@@ -298,6 +286,7 @@ public class PowerPlayTeleOp extends LinearOpMode {
                 close();
                 fBL.setPosition(dropPositions[fBLpos]);
                 sleep(350);
+                pusher.setPosition(0);
             }).start();
         }
 
