@@ -40,7 +40,7 @@ public class PowerPlayTeleOp extends LinearOpMode {
 
 
 
-    private Servo fBL, rightClaw, leftClaw, brace;
+    private Servo fBL, rightClaw, leftClaw, pusher;
     private DistanceSensor frontDist;
 
     private int upperBound = 2400;
@@ -111,7 +111,7 @@ public class PowerPlayTeleOp extends LinearOpMode {
 
 
         fBL = hardwareMap.get(Servo.class, "fourbar");
-        brace = hardwareMap.get(Servo.class, "pusher");
+        pusher = hardwareMap.get(Servo.class, "pusher");
         //fBL.setPosition(0);
 
         leftClaw = hardwareMap.get(Servo.class, "leftClaw");
