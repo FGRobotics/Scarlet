@@ -66,13 +66,16 @@ public class rightTrial extends LinearOpMode {
         pusher = hardwareMap.get(Servo.class, "pusher");
 
         fBL = hardwareMap.get(Servo.class, "fourbar");
+        pusher.setPosition(1);
         Pose2d startPose = new Pose2d(36, -64, Math.toRadians(0));//x: -64
+
 
         //claw.setPosition(1);
 
 
         //Traj Seq
         TrajectorySequence start = drive.trajectorySequenceBuilder(new Pose2d(36, -64, Math.toRadians(0)))
+                .UNSTABLE_addTemporalMarkerOffset(.4,()->fBL.setPosition(0))
                 .UNSTABLE_addTemporalMarkerOffset(.5,()->fBL.setPosition(0.2))
                 .UNSTABLE_addTemporalMarkerOffset(0, ()->{
                     new Thread(()->{
@@ -86,7 +89,7 @@ public class rightTrial extends LinearOpMode {
                         rSlides.setPower(1);
 
 
-                        while(lSlides.getCurrentPosition() < 1800){
+                        while(lSlides.getCurrentPosition() < 1300){
                             continue;
                         }
                         lSlides.setPower(0);
@@ -96,8 +99,8 @@ public class rightTrial extends LinearOpMode {
                 //.splineToLinearHeading(new Pose2d(36, -22.5, Math.toRadians(0)), Math.toRadians(90))
                 //.splineToLinearHeading(new Pose2d(30, -22.5, Math.toRadians(0)), Math.toRadians(90))
 
-                .lineToSplineHeading(new Pose2d(36, -22.5, Math.toRadians(0)))//first pole-medium
-                .lineToSplineHeading(new Pose2d(30, -22.5, Math.toRadians(0)),
+                .lineToSplineHeading(new Pose2d(36, -23, Math.toRadians(0)))//first pole-medium
+                .lineToSplineHeading(new Pose2d(31, -24, Math.toRadians(0)),
                         SampleMecanumDrive.getVelocityConstraint(12, DriveConstants.MAX_ANG_VEL,
                                 DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
@@ -109,8 +112,8 @@ public class rightTrial extends LinearOpMode {
                     fBL.setPosition(0);
                 })
                 //first drop off
-                .waitSeconds(0.5)
-                .UNSTABLE_addTemporalMarkerOffset(-0.4,()->open())
+                .waitSeconds(0.7)
+                .UNSTABLE_addTemporalMarkerOffset(-0.2,()->open())
                 .UNSTABLE_addTemporalMarkerOffset(0.2, ()->close())
 
 
@@ -120,10 +123,11 @@ public class rightTrial extends LinearOpMode {
         TrajectorySequence cycle = drive.trajectorySequenceBuilder(start.end())
 
                 //.UNSTABLE_addTemporalMarkerOffset(0, ()->close())
-                .UNSTABLE_addTemporalMarkerOffset(0.5, ()->fBL.setPosition(0.85))
+                .UNSTABLE_addTemporalMarkerOffset(0.5, ()->pusher.setPosition(1))
+                .UNSTABLE_addTemporalMarkerOffset(0.5, ()->fBL.setPosition(0.84)) // was 0.87
                 .waitSeconds(0.5)
-                .lineToSplineHeading(new Pose2d(37, -11.6, Math.toRadians(0)))
-                .UNSTABLE_addTemporalMarkerOffset(-0.2,()->{
+                .lineToSplineHeading(new Pose2d(45, -11.7, Math.toRadians(0))) //y = -11.6
+                .UNSTABLE_addTemporalMarkerOffset(-0.5,()->{
                     open();
                     new Thread(()->{
 
@@ -144,7 +148,7 @@ public class rightTrial extends LinearOpMode {
                     }).start();
 
                 })
-                .lineToSplineHeading(new Pose2d(55, -11.6, Math.toRadians(0)),
+                .lineToSplineHeading(new Pose2d(54, -11.6, Math.toRadians(0)),
                         SampleMecanumDrive.getVelocityConstraint(12, DriveConstants.MAX_ANG_VEL,
                                 DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
@@ -162,23 +166,24 @@ public class rightTrial extends LinearOpMode {
                         rSlides.setPower(1);
 
 
-                        while(lSlides.getCurrentPosition() < 1800){
+                        while(lSlides.getCurrentPosition() < 1200){
                             continue;
                         }
                         lSlides.setPower(0);
                         rSlides.setPower(0);
                     }).start();
                 })
-                .lineToSplineHeading(new Pose2d(37, -12, Math.toRadians(0)))
+                .lineToSplineHeading(new Pose2d(50, -12, Math.toRadians(0)))
                 .UNSTABLE_addTemporalMarkerOffset(-0.3, ()->fBL.setPosition(0.2))
-                .lineToSplineHeading(new Pose2d(30, -26, Math.toRadians(0)))
+                .UNSTABLE_addTemporalMarkerOffset(-0.3, ()->pusher.setPosition(0))
+                .lineToSplineHeading(new Pose2d(28, -20, Math.toRadians(55)))
                 //second drop off
 
                 .UNSTABLE_addTemporalMarkerOffset(0,()->{
                     fBL.setPosition(0);
                 })
                 .waitSeconds(0.5)
-                .UNSTABLE_addTemporalMarkerOffset(-0.4,()->open())
+                .UNSTABLE_addTemporalMarkerOffset(-0.1,()->open())
                 .UNSTABLE_addTemporalMarkerOffset(0.2, ()->close())
 
 
@@ -189,9 +194,13 @@ public class rightTrial extends LinearOpMode {
                 .build();
         //second pickup
         TrajectorySequence cycle2 = drive.trajectorySequenceBuilder(cycle.end())
-                .UNSTABLE_addTemporalMarkerOffset(0.5, ()->fBL.setPosition(0.88))
+                .UNSTABLE_addTemporalMarkerOffset(0.5, ()->pusher.setPosition(1))
+                .UNSTABLE_addTemporalMarkerOffset(0.5, ()->fBL.setPosition(0.87))
                 .waitSeconds(0.5)
-                .lineToSplineHeading(new Pose2d(37, -12.5, Math.toRadians(0)))
+                .lineToSplineHeading(new Pose2d(40, -12.5, Math.toRadians(0)),
+                        SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL,
+                                DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .UNSTABLE_addTemporalMarkerOffset(-0.2,()->{
                     open();
                     new Thread(()->{
@@ -234,23 +243,24 @@ public class rightTrial extends LinearOpMode {
                         rSlides.setPower(1);
 
 
-                        while(lSlides.getCurrentPosition() < 1800){
+                        while(lSlides.getCurrentPosition() < 1200){
                             continue;
                         }
                         lSlides.setPower(0);
                         rSlides.setPower(0);
                     }).start();
                 })
-                .lineToSplineHeading(new Pose2d(37, -12, Math.toRadians(0)))
+                .lineToSplineHeading(new Pose2d(50, -12, Math.toRadians(0)))
                 .UNSTABLE_addTemporalMarkerOffset(-0.3, ()->fBL.setPosition(0.2))
-                .lineToSplineHeading(new Pose2d(29.5, -28, Math.toRadians(0)))
-                //second drop off
+                .UNSTABLE_addTemporalMarkerOffset(-0.3, ()->pusher.setPosition(0))
+                .lineToSplineHeading(new Pose2d(28, -18, Math.toRadians(55)))
+                //third drop off
 
-                .UNSTABLE_addTemporalMarkerOffset(0.1,()->{
+                .UNSTABLE_addTemporalMarkerOffset(0,()->{
                     fBL.setPosition(0);
                 })
-                .waitSeconds(0.5)
-                .UNSTABLE_addTemporalMarkerOffset(-0.1,()->open())
+                .waitSeconds(0.2)
+                .UNSTABLE_addTemporalMarkerOffset(0,()->open())
                 .UNSTABLE_addTemporalMarkerOffset(0.2, ()->close())
                 .UNSTABLE_addTemporalMarkerOffset(0.5, ()->fBL.setPosition(0.4))
                 .waitSeconds(0.8)
@@ -426,7 +436,7 @@ public class rightTrial extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
         close();
-        pusher.setPosition(0.3);
+        pusher.setPosition(0);
         //sleep(500);
         drive.setPoseEstimate(startPose);
         drive.followTrajectorySequence(start);
@@ -435,10 +445,11 @@ public class rightTrial extends LinearOpMode {
         drive.followTrajectorySequence(cycle2);
         //drive.followTrajectorySequence(cycle3);
 
-
         close();
         sleep(200);
-
+        new Thread(()->{
+            fBL.setPosition(0);
+        }).start();
 
         if(parkingSpot == 1){
             drive.followTrajectory(parktwo);
@@ -451,7 +462,23 @@ public class rightTrial extends LinearOpMode {
             drive.followTrajectory(parktwo);
             drive.followTrajectory(parkthree);
         }
-        fBL.setPosition(0.3);
+
+            lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+            lSlides.setPower(-1);
+            rSlides.setPower(-1);
+
+
+            while(lSlides.getCurrentPosition() > 0){
+                continue;
+            }
+            lSlides.setPower(0);
+            rSlides.setPower(0);
+
+        pusher.setPosition(1);
+
 
 
 
