@@ -26,7 +26,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.io.IOException;
 import java.util.List;
 
-@Autonomous(name="Red Left",group="Linear OpMode")
+@Autonomous(name="Left",group="Linear OpMode")
 public class BlueLeft extends LinearOpMode {
 
     private int parkingSpot = 1;
@@ -34,7 +34,7 @@ public class BlueLeft extends LinearOpMode {
 
 
     private DcMotor lSlides, rSlides;
-    private Servo fBL, rightClaw, leftClaw;
+    private Servo fBL, rightClaw, leftClaw, pusher;
 
 
     private AnalogInput turnTableEncoder;
@@ -65,6 +65,9 @@ public class BlueLeft extends LinearOpMode {
 
 
         fBL = hardwareMap.get(Servo.class, "fourbar");
+        pusher = hardwareMap.get(Servo.class, "pusher");
+        pusher.setPosition(0);
+
         Pose2d startPose = new Pose2d(-36, -64, Math.toRadians(0));
 
         //claw.setPosition(1);
@@ -72,40 +75,8 @@ public class BlueLeft extends LinearOpMode {
 
         //Traj Seq
         TrajectorySequence start = drive.trajectorySequenceBuilder(startPose)
-                .lineToSplineHeading(new Pose2d(-36, -45, Math.toRadians(0)))//first pole-small
-                .lineToSplineHeading(new Pose2d(-37, -45, Math.toRadians(0)))
-
-
-
-                .waitSeconds(0.5)
-
-                .addDisplacementMarker(()->{
-                    open();
-                    sleep(200);
-                    fBL.setPosition(0.5);
-                    sleep(200);
-                }) // drops off
-
-                .lineToSplineHeading(new Pose2d(-36, -24, Math.toRadians(0)))
-
-
-                .waitSeconds(0.5)
-                .build();
-
-        TrajectorySequence cycle = drive.trajectorySequenceBuilder(start.end())
-                .lineToSplineHeading(new Pose2d(-37, -12, Math.toRadians(0)))
-                .lineToSplineHeading(new Pose2d(-38, -12, Math.toRadians(180)))
-                .waitSeconds(1)
-                .UNSTABLE_addTemporalMarkerOffset(-0.5, ()-> fBL.setPosition(0.88))
-                .UNSTABLE_addTemporalMarkerOffset(0.2, ()->open())
-                .waitSeconds(1)
-                .lineToSplineHeading(new Pose2d(-55, -12, Math.toRadians(180)),
-                        SampleMecanumDrive.getVelocityConstraint(12, DriveConstants.MAX_ANG_VEL,
-                                DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .waitSeconds(0.5)
-                .UNSTABLE_addTemporalMarkerOffset(-0.4, ()->close())
-                .UNSTABLE_addTemporalMarkerOffset(-0.2, ()->{
+                .UNSTABLE_addTemporalMarkerOffset(0,()->{
+                    fBL.setPosition(0.4);
                     new Thread(()->{
 
 
@@ -117,19 +88,37 @@ public class BlueLeft extends LinearOpMode {
                         rSlides.setPower(1);
 
 
-                        while(lSlides.getCurrentPosition() < 800){
+                        while(lSlides.getCurrentPosition() < 2000){
                             continue;
                         }
                         lSlides.setPower(0);
                         rSlides.setPower(0);
                     }).start();
-                })
-                .lineToSplineHeading(new Pose2d(-36, -12, Math.toRadians(180)))
-                .UNSTABLE_addTemporalMarkerOffset(-0.3, ()->fBL.setPosition(0.53))
-                .lineToSplineHeading(new Pose2d(-36, -25, Math.toRadians(180)))
-                .waitSeconds(0.5)
-                .UNSTABLE_addTemporalMarkerOffset(-0.1,()->{
+                }) // drops off
+                .lineToSplineHeading(new Pose2d(-33, 0, Math.toRadians(0)),
+                        SampleMecanumDrive.getVelocityConstraint(52 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))//first pole-high
+
+
+
+                .waitSeconds(0.3)
+
+                .UNSTABLE_addTemporalMarkerOffset(0,()->{
+                    pusher.setPosition(0.5);
+                    sleep(1000);
                     open();
+                    sleep(200);
+                }) // drops off
+                .waitSeconds(0.5)
+                .lineToSplineHeading(new Pose2d(-33,-15,Math.toRadians(0)))
+
+
+
+
+                .build();
+
+        TrajectorySequence cycle = drive.trajectorySequenceBuilder(start.end())
+                .UNSTABLE_addTemporalMarkerOffset(-0.5,()->{
                     new Thread(()->{
 
 
@@ -147,27 +136,379 @@ public class BlueLeft extends LinearOpMode {
                         lSlides.setPower(0);
                         rSlides.setPower(0);
                     }).start();
+                    open();
+                })
+                .lineToSplineHeading(new Pose2d(-36, -13, Math.toRadians(180)),
+                        SampleMecanumDrive.getVelocityConstraint(40 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+
+                //.addSpatialMarker(new Vector2d(-38, -13), ()->open())
+                .UNSTABLE_addTemporalMarkerOffset(-1, ()->{
+                    open();
+                    fBL.setPosition(.83); //was .85
+                    pusher.setPosition(1);
 
                 })
-                .UNSTABLE_addTemporalMarkerOffset(0.2,()->fBL.setPosition(0.5))
+                .lineTo(
+                        new Vector2d(-52,-15),
+                        SampleMecanumDrive.getVelocityConstraint(10 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))//pickup
+                .waitSeconds(0.5)
+
+                .UNSTABLE_addTemporalMarkerOffset(0,()->close())
+
+
+                .UNSTABLE_addTemporalMarkerOffset(0.5,()->{
+                    new Thread(()->{
+
+
+                        lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+                        lSlides.setPower(1);
+                        rSlides.setPower(1);
+
+
+                        while(lSlides.getCurrentPosition() < 500){
+                            continue;
+                        }
+                        lSlides.setPower(0);
+                        rSlides.setPower(0);
+                    }).start();
+                    fBL.setPosition(0.38);
+                    pusher.setPosition(1);
+
+
+                })
+                .waitSeconds(1)
+
+
+                .UNSTABLE_addTemporalMarkerOffset(-0.2,()->{
+                    new Thread(()->{
+
+
+                        lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+                        lSlides.setPower(-1);
+                        rSlides.setPower(-1);
+
+
+                        while(lSlides.getCurrentPosition() > 0){
+                            continue;
+                        }
+                        lSlides.setPower(0);
+                        rSlides.setPower(0);
+                    }).start();
+                    pusher.setPosition(0);
+                })
+
+                .lineToSplineHeading(new Pose2d(-23, -15, Math.toRadians(-90)),
+                    SampleMecanumDrive.getVelocityConstraint(52, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                    SampleMecanumDrive.getAccelerationConstraint(25))//pickup))//second pole-medium
+                .UNSTABLE_addTemporalMarkerOffset(0.2,()->{
+
+                    pusher.setPosition(0.5);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.7, ()->open())
+                .waitSeconds(1)
+
+                .UNSTABLE_addTemporalMarkerOffset(0,()-> pusher.setPosition(0))
+
+
+                // .waitSeconds(2)
+                /*
+                .lineToSplineHeading(new Pose2d(58, -12, Math.toRadians(0)))//pickup
+                .waitSeconds(2)
+                .lineToSplineHeading(new Pose2d(24, -12, Math.toRadians(-90)))//third pole-medium
+                .waitSeconds(2)
+                .lineToSplineHeading(new Pose2d(58, -12, Math.toRadians(0)))//pickup
+                .waitSeconds(2)
+                .lineToSplineHeading(new Pose2d(0, -12, Math.toRadians(-90)))//fourth pole-high
+                .waitSeconds(2)
+
+                 */
+
+
+                //back 25 for parking spot 1
+                //foward 25 for parking spot 3
+                //stay put for parking spot 2
+                //.forward(25)
+
+                .build();
+
+
+        TrajectorySequence cycle2 = drive.trajectorySequenceBuilder(cycle.end())
+                .UNSTABLE_addTemporalMarkerOffset(-0.5,()->{
+                    new Thread(()->{
+
+
+                        lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+                        lSlides.setPower(-1);
+                        rSlides.setPower(-1);
+
+
+                        while(lSlides.getCurrentPosition() > 0){
+                            continue;
+                        }
+                        lSlides.setPower(0);
+                        rSlides.setPower(0);
+                    }).start();
+                    open();
+                })
+                .lineToSplineHeading(new Pose2d(-36, -13, Math.toRadians(180)),
+                        SampleMecanumDrive.getVelocityConstraint(40 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+
+                //.addSpatialMarker(new Vector2d(-38, -13), ()->open())
+                .UNSTABLE_addTemporalMarkerOffset(-1, ()->{
+                    open();
+                    fBL.setPosition(.85);
+                    pusher.setPosition(1);
+
+                })
+                .lineTo(
+                        new Vector2d(-52,-12),
+                        SampleMecanumDrive.getVelocityConstraint(10 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))//pickup
+                .waitSeconds(0.5)
+
+                .UNSTABLE_addTemporalMarkerOffset(0,()->close())
+                .waitSeconds(1)
+
+                .UNSTABLE_addTemporalMarkerOffset(0.5,()->{
+                    new Thread(()->{
+
+
+                        lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+                        lSlides.setPower(1);
+                        rSlides.setPower(1);
+
+
+                        while(lSlides.getCurrentPosition() < 400){
+                            continue;
+                        }
+                        lSlides.setPower(0);
+                        rSlides.setPower(0);
+                    }).start();
+                    fBL.setPosition(0.5);
+                    pusher.setPosition(0);
+
+
+                })
+                .waitSeconds(1)
+
+
+                .UNSTABLE_addTemporalMarkerOffset(-0.2,()->{
+                    new Thread(()->{
+
+
+                        lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+                        lSlides.setPower(-1);
+                        rSlides.setPower(-1);
+
+
+                        while(lSlides.getCurrentPosition() > 0){
+                            continue;
+                        }
+                        lSlides.setPower(0);
+                        rSlides.setPower(0);
+                    }).start();
+                    pusher.setPosition(0);
+                })
+
+                .lineToSplineHeading(new Pose2d(-40, -15, Math.toRadians(90)),
+                        SampleMecanumDrive.getVelocityConstraint(52, Math.toRadians(100), DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(25))//pickup))//second pole-medium
+                .UNSTABLE_addTemporalMarkerOffset(0.2,()->{
+                    fBL.setPosition(0);
+                    pusher.setPosition(0);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.7, ()->open())
+                .waitSeconds(0.7)
+                .UNSTABLE_addTemporalMarkerOffset(0, ()->{
+                    close();
+                })
+                .waitSeconds(0.5)
+                .UNSTABLE_addTemporalMarkerOffset(0,()-> fBL.setPosition(0.5))
+
+
+
+                // .waitSeconds(2)
+                /*
+                .lineToSplineHeading(new Pose2d(58, -12, Math.toRadians(0)))//pickup
+                .waitSeconds(2)
+                .lineToSplineHeading(new Pose2d(24, -12, Math.toRadians(-90)))//third pole-medium
+                .waitSeconds(2)
+                .lineToSplineHeading(new Pose2d(58, -12, Math.toRadians(0)))//pickup
+                .waitSeconds(2)
+                .lineToSplineHeading(new Pose2d(0, -12, Math.toRadians(-90)))//fourth pole-high
+                .waitSeconds(2)
+
+                 */
+
+
+                //back 25 for parking spot 1
+                //foward 25 for parking spot 3
+                //stay put for parking spot 2
+                //.forward(25)
+
+                .build();
+
+        TrajectorySequence cycle3 = drive.trajectorySequenceBuilder(cycle.end())
+                .UNSTABLE_addTemporalMarkerOffset(-0.5,()->{
+                    new Thread(()->{
+
+
+                        lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+                        lSlides.setPower(-1);
+                        rSlides.setPower(-1);
+
+
+                        while(lSlides.getCurrentPosition() > 0){
+                            continue;
+                        }
+                        lSlides.setPower(0);
+                        rSlides.setPower(0);
+                    }).start();
+                    open();
+                })
+                .lineToSplineHeading(new Pose2d(-36, -15, Math.toRadians(180)),
+                        SampleMecanumDrive.getVelocityConstraint(40 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+
+                //.addSpatialMarker(new Vector2d(-38, -13), ()->open())
+                .UNSTABLE_addTemporalMarkerOffset(-1, ()->{
+                    open();
+                    fBL.setPosition(.87); //was .81
+                    pusher.setPosition(1);
+
+                })
+                .lineTo(
+                        new Vector2d(-52,-16),
+                        SampleMecanumDrive.getVelocityConstraint(10 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))//pickup
+                .waitSeconds(0.5)
+
+                .UNSTABLE_addTemporalMarkerOffset(0,()->close())
+
+
+                .UNSTABLE_addTemporalMarkerOffset(0.5,()->{
+                    new Thread(()->{
+
+
+                        lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+                        lSlides.setPower(1);
+                        rSlides.setPower(1);
+
+
+                        while(lSlides.getCurrentPosition() < 200){
+                            continue;
+                        }
+                        lSlides.setPower(0);
+                        rSlides.setPower(0);
+                    }).start();
+                    fBL.setPosition(0.36);
+                    pusher.setPosition(0);
+
+
+                })
+                .waitSeconds(1)
+
+
+                .UNSTABLE_addTemporalMarkerOffset(-0.2,()->{
+                    new Thread(()->{
+
+
+                        lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+                        lSlides.setPower(-1);
+                        rSlides.setPower(-1);
+
+
+                        while(lSlides.getCurrentPosition() > 0){
+                            continue;
+                        }
+                        lSlides.setPower(0);
+                        rSlides.setPower(0);
+                    }).start();
+                    pusher.setPosition(0);
+                })
+
+
+
+                .lineToSplineHeading(new Pose2d(-23, -18, Math.toRadians(-90)),
+                        SampleMecanumDrive.getVelocityConstraint(52, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(25))//pickup))//second pole-medium
+                .UNSTABLE_addTemporalMarkerOffset(0.2,()->{
+
+                    pusher.setPosition(0.5);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.7, ()->open())
+                .waitSeconds(1)
+
+                .UNSTABLE_addTemporalMarkerOffset(0,()-> pusher.setPosition(0))
+                .waitSeconds(0.5)
+
+
+                // .waitSeconds(2)
+                /*
+                .lineToSplineHeading(new Pose2d(58, -12, Math.toRadians(0)))//pickup
+                .waitSeconds(2)
+                .lineToSplineHeading(new Pose2d(24, -12, Math.toRadians(-90)))//third pole-medium
+                .waitSeconds(2)
+                .lineToSplineHeading(new Pose2d(58, -12, Math.toRadians(0)))//pickup
+                .waitSeconds(2)
+                .lineToSplineHeading(new Pose2d(0, -12, Math.toRadians(-90)))//fourth pole-high
+                .waitSeconds(2)
+
+                 */
+
+
+                //back 25 for parking spot 1
+                //foward 25 for parking spot 3
+                //stay put for parking spot 2
+                //.forward(25)
+
                 .build();
 
         //parking spot one
 
         Trajectory parktwo = drive.trajectoryBuilder(start.end())
-                .lineTo(new Vector2d(-36,-32))
+                .lineToSplineHeading(new Pose2d(-36, -16, Math.toRadians(-90)))
+//-36,-16
+
 
                 .build();
         //parking spot two
         //JUST STAY PUT AT 36, -10
         //parking spot three
         Trajectory parkthree = drive.trajectoryBuilder(parktwo.end())
-                .lineTo(new Vector2d(-13,-32))
+                .lineTo(new Vector2d(-13,-16))
 
 
                 .build();
         Trajectory parkone = drive.trajectoryBuilder(parktwo.end())
-                .lineTo(new Vector2d(-57,-32))
+                .lineTo(new Vector2d(-57,-16))
 
 
                 .build();
@@ -217,23 +558,90 @@ public class BlueLeft extends LinearOpMode {
         if (isStopRequested()) return;
         close();
         drive.setPoseEstimate(startPose);
-        fBL.setPosition(.55);
+        fBL.setPosition(.23);
         sleep(500);
         drive.followTrajectorySequence(start);
         drive.followTrajectorySequence(cycle);
+        drive.followTrajectorySequence(cycle3);
+
         /*
+        Start: places on high
+        cycle: places on medium
+        cycle2: wants to place on low
+        cycle3: places on medium (literally copy paste with slight modifications of cycle
+         */
         if(parkingSpot == 1){
             drive.followTrajectory(parktwo);
             drive.followTrajectory(parkone);
+            new Thread(()->{
+
+
+                lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+                lSlides.setPower(-1);
+                rSlides.setPower(-1);
+
+
+                while(lSlides.getCurrentPosition() > 0){
+                    continue;
+                }
+                lSlides.setPower(0);
+                rSlides.setPower(0);
+            }).start();
+            pusher.setPosition(1);
+            fBL.setPosition(1);
         }
         if(parkingSpot == 2){
             drive.followTrajectory(parktwo);
+            new Thread(()->{
+
+
+                lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+                lSlides.setPower(-1);
+                rSlides.setPower(-1);
+
+
+                while(lSlides.getCurrentPosition() > 0){
+                    continue;
+                }
+                lSlides.setPower(0);
+                rSlides.setPower(0);
+            }).start();
+            pusher.setPosition(1);
+            fBL.setPosition(1);
         }
         if(parkingSpot ==3){
             drive.followTrajectory(parktwo);
             drive.followTrajectory(parkthree);
+            new Thread(()->{
+
+
+                lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+                lSlides.setPower(-1);
+                rSlides.setPower(-1);
+
+
+                while(lSlides.getCurrentPosition() > 0){
+                    continue;
+                }
+                lSlides.setPower(0);
+                rSlides.setPower(0);
+            }).start();
+            pusher.setPosition(1);
+            fBL.setPosition(1);
+
         }
-        sleep(5000);*/
+
+
+
 
 
 
@@ -244,7 +652,6 @@ public class BlueLeft extends LinearOpMode {
     public void open(){
         rightClaw.setPosition(.5);
         leftClaw.setPosition((.3));
-
     }
     public void close(){
         rightClaw.setPosition(1);
