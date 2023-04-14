@@ -95,9 +95,9 @@ public class BlueLeft extends LinearOpMode {
                         rSlides.setPower(0);
                     }).start();
                 }) // drops off
-                .lineToSplineHeading(new Pose2d(-33, 0, Math.toRadians(0)),
+                .lineToSplineHeading(new Pose2d(-34, 0, Math.toRadians(0)),
                         SampleMecanumDrive.getVelocityConstraint(52 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))//first pole-high
+                        SampleMecanumDrive.getAccelerationConstraint(25))//first pole-high
 
 
 
@@ -139,7 +139,7 @@ public class BlueLeft extends LinearOpMode {
                     open();
                 })
                 .lineToSplineHeading(new Pose2d(-36, -13, Math.toRadians(180)),
-                        SampleMecanumDrive.getVelocityConstraint(40 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getVelocityConstraint(52 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
 
                 //.addSpatialMarker(new Vector2d(-38, -13), ()->open())
@@ -151,7 +151,7 @@ public class BlueLeft extends LinearOpMode {
                 })
                 .lineTo(
                         new Vector2d(-52,-15),
-                        SampleMecanumDrive.getVelocityConstraint(10 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getVelocityConstraint(12 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))//pickup
                 .waitSeconds(0.5)
 
@@ -379,7 +379,7 @@ public class BlueLeft extends LinearOpMode {
                         rSlides.setPower(-1);
 
 
-                        while(lSlides.getCurrentPosition() > 0){
+                        while(lSlides.getCurrentPosition() > 200){
                             continue;
                         }
                         lSlides.setPower(0);
@@ -388,8 +388,8 @@ public class BlueLeft extends LinearOpMode {
                     open();
                 })
                 .lineToSplineHeading(new Pose2d(-36, -15, Math.toRadians(180)),
-                        SampleMecanumDrive.getVelocityConstraint(40 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                        SampleMecanumDrive.getVelocityConstraint(52 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(25))
 
                 //.addSpatialMarker(new Vector2d(-38, -13), ()->open())
                 .UNSTABLE_addTemporalMarkerOffset(-1, ()->{
@@ -400,8 +400,8 @@ public class BlueLeft extends LinearOpMode {
                 })
                 .lineTo(
                         new Vector2d(-52,-16),
-                        SampleMecanumDrive.getVelocityConstraint(10 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))//pickup
+                        SampleMecanumDrive.getVelocityConstraint(12 , DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(25))//pickup
                 .waitSeconds(0.5)
 
                 .UNSTABLE_addTemporalMarkerOffset(0,()->close())
@@ -433,7 +433,21 @@ public class BlueLeft extends LinearOpMode {
                 .waitSeconds(1)
 
 
-                .UNSTABLE_addTemporalMarkerOffset(-0.2,()->{
+
+
+
+
+                .lineToSplineHeading(new Pose2d(-23, -18, Math.toRadians(-90)),
+                        SampleMecanumDrive.getVelocityConstraint(52, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(25))//pickup))//second pole-medium
+
+                .UNSTABLE_addTemporalMarkerOffset(0.2,()->{
+
+                    pusher.setPosition(0.5);
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0.7, ()->open())
+                .waitSeconds(1)
+                .UNSTABLE_addTemporalMarkerOffset(0,()->{
                     new Thread(()->{
 
 
@@ -453,18 +467,6 @@ public class BlueLeft extends LinearOpMode {
                     }).start();
                     pusher.setPosition(0);
                 })
-
-
-
-                .lineToSplineHeading(new Pose2d(-23, -18, Math.toRadians(-90)),
-                        SampleMecanumDrive.getVelocityConstraint(52, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(25))//pickup))//second pole-medium
-                .UNSTABLE_addTemporalMarkerOffset(0.2,()->{
-
-                    pusher.setPosition(0.5);
-                })
-                .UNSTABLE_addTemporalMarkerOffset(0.7, ()->open())
-                .waitSeconds(1)
 
                 .UNSTABLE_addTemporalMarkerOffset(0,()-> pusher.setPosition(0))
                 .waitSeconds(0.5)
@@ -493,7 +495,7 @@ public class BlueLeft extends LinearOpMode {
 
         //parking spot one
 
-        Trajectory parktwo = drive.trajectoryBuilder(start.end())
+        Trajectory parktwo = drive.trajectoryBuilder(cycle3.end())
                 .lineToSplineHeading(new Pose2d(-36, -16, Math.toRadians(-90)))
 //-36,-16
 
