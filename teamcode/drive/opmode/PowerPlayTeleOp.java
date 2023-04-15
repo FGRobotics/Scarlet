@@ -33,6 +33,7 @@ import java.util.List;
 public class PowerPlayTeleOp extends LinearOpMode {
     private DcMotorEx leftFront, leftRear, rightRear, rightFront, yAxis, xAxis;
     private DcMotor lSlides, rSlides; //joey was here
+    private DcMotor LED;
     private List<DcMotorEx> motors;
     private boolean isOpen = false;
     boolean tCancel = false;
@@ -48,7 +49,7 @@ public class PowerPlayTeleOp extends LinearOpMode {
 
     private boolean isAlive = false;
     private int fBLpos = 0;
-    private double[] dropPositions = {1,0.9 ,0.4, 0.2, 0, 0.45};
+    private double[] dropPositions = {1,0.9 ,0.4, 0.2, 0, 0.65};
     private int polePos = 0;
     private double actfieldCentricMultiplier = .7;
     private double fieldCentricMultiplier = .7;
@@ -56,6 +57,7 @@ public class PowerPlayTeleOp extends LinearOpMode {
     double lastResetpos = 0.0;
     //private int normTurnTable = turnTable.getCurrentPosition();
     private CRServo one;
+
 
     // The IMU sensor object
     BNO055IMU imu;
@@ -83,6 +85,11 @@ public class PowerPlayTeleOp extends LinearOpMode {
         leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
         rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
         rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+
+        LED = hardwareMap.get(DcMotor.class, "yAxis");
+
+
+
 
         //Brake behavier
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -238,7 +245,6 @@ public class PowerPlayTeleOp extends LinearOpMode {
     }
 
     public void gp2() {
-
         //auto bsck drop
         if(gamepad2.dpad_up){
             new Thread(()->{
@@ -281,10 +287,12 @@ public class PowerPlayTeleOp extends LinearOpMode {
             if(!isOpen) {
                 new Thread(()->{
                     open();
+                    LED.setPower(0);
                 }).start();
             } else{
                 new Thread(()->{
                     close();
+                    LED.setPower(0.2);
                 }).start();
             }
         }
@@ -299,6 +307,7 @@ public class PowerPlayTeleOp extends LinearOpMode {
                 close();
                 pusher.setPosition(1);
                 fBL.setPosition(1);
+                LED.setPower(0);
             }).start();
         }
         //front drop
@@ -310,7 +319,8 @@ public class PowerPlayTeleOp extends LinearOpMode {
                 close();
                 fBL.setPosition(dropPositions[fBLpos]);
                 sleep(350);
-                pusher.setPosition(0.8); //was 0.8
+                pusher.setPosition(0.5); //was 0.8
+                LED.setPower(0.2);
             }).start();
         }
         //back setup
@@ -340,7 +350,7 @@ public class PowerPlayTeleOp extends LinearOpMode {
                 close();
                 fBL.setPosition(dropPositions[fBLpos]);
                 sleep(350);
-                pusher.setPosition(0);
+                pusher.setPosition(1);
             }).start();
         }
 
