@@ -34,6 +34,7 @@ public class BlueLeft extends LinearOpMode {
 
 
     private DcMotor lSlides, rSlides;
+    private DcMotor LED;
     private Servo fBL, rightClaw, leftClaw, pusher;
 
 
@@ -54,6 +55,8 @@ public class BlueLeft extends LinearOpMode {
         //turnTable = hardwareMap.get(DcMotor.class, "turnTable");
         rSlides = hardwareMap.get(DcMotor.class, "rSlides");
         lSlides = hardwareMap.get(DcMotor.class, "lSlides");
+
+        LED = hardwareMap.get(DcMotor.class, "yAxis");
 
         rSlides.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -552,6 +555,7 @@ public class BlueLeft extends LinearOpMode {
             telemetry.addData("parking spot: ", parkingSpot);
             telemetry.update();
 
+
         }
 
 
@@ -559,6 +563,36 @@ public class BlueLeft extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
         close();
+        new Thread(()->{
+            if(parkingSpot == 1){
+                for(int i = 1; i <= 1; i++){
+                    LED.setPower(0.2);
+                    sleep(1000);
+                    LED.setPower(0);
+                }
+            }
+            else if(parkingSpot==2){
+                for(int i = 1; i <= 2; i++){
+                    LED.setPower(0.2);
+                    sleep(1000);
+                    LED.setPower(0);
+                }
+            }
+            else if(parkingSpot == 3){
+                for(int i = 1; i <= 3; i++){
+                    LED.setPower(0.2);
+                    sleep(1000);
+                    LED.setPower(0);
+                }
+            }
+            else{
+                for(int i = 1; i <= 5; i++){
+                    LED.setPower(0.2);
+                    sleep(1000);
+                    LED.setPower(0);
+                }
+            }
+        }).start();
         drive.setPoseEstimate(startPose);
         fBL.setPosition(.23);
         sleep(500);
