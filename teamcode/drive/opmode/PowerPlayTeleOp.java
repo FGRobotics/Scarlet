@@ -50,7 +50,7 @@ public class PowerPlayTeleOp extends LinearOpMode {
     private boolean isAlive = false;
     private int fBLpos = 0;
     private double[] dropPositions = {1,0.9 ,0.4, 0.2, 0, 0.65};
-    private int polePos = 0;
+    private int polePos = 0; //joey was here again
     private double actfieldCentricMultiplier = .7;
     private double fieldCentricMultiplier = .7;
     private double rotationalMult = .6;
@@ -248,36 +248,12 @@ public class PowerPlayTeleOp extends LinearOpMode {
         //auto bsck drop
         if(gamepad2.dpad_up){
             new Thread(()->{
-                close();
-                fBL.setPosition(0.2);
-                lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                lSlides.setPower(1);
-                rSlides.setPower(1);
-
-                while(lSlides.getCurrentPosition() < 2100){
-                    continue;
-                }
-                lSlides.setPower(0);
-                rSlides.setPower(0);
+                pusher.setPosition(0.5);
             }).start();
         }
-        if(gamepad2.dpad_right){
+        if(gamepad2.dpad_down){
             new Thread(()->{
-                close();
-                fBL.setPosition(0.2);
-                lSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                rSlides.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                lSlides.setPower(1);
-                rSlides.setPower(1);
-
-                while(lSlides.getCurrentPosition() < 1100){
-                    continue;
-                }
-                lSlides.setPower(0);
-                rSlides.setPower(0);
+                pusher.setPosition(0);
             }).start();
         }
 
